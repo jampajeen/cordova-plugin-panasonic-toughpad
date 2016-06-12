@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='utf-8'?>
+<plugin id="cordova-plugin-panasonic-toughpad" version="1.0.0" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
+    <name>CordovaPluginPanasonicToughpad</name>
+    <js-module name="CordovaPluginPanasonicToughpad" src="www/CordovaPluginPanasonicToughpad.js">
+        <clobbers target="PanasonicToughpad" />
+    </js-module>
+    <hook type="after_plugin_add" src="hooks/after_plugin_add.js" />
+    <platform name="android">
+        <config-file parent="/*" target="res/xml/config.xml">
+            <feature name="CordovaPluginPanasonicToughpad">
+                <param name="android-package" value="com.volho.example.cordova.plugin.CordovaPluginPanasonicToughpad" />
+            </feature>
+        </config-file>
+        <config-file parent="/*" target="AndroidManifest.xml"></config-file>
+        <source-file src="src/android/CordovaPluginPanasonicToughpad.java" target-dir="src/com/volho/example/cordova/plugin" />
+    </platform>
+</plugin>

@@ -31,4 +31,9 @@ CordovaPluginPanasonicToughpad.prototype.scanBarcode = function(message, success
     exec( successCallback, errorCallback, "CordovaPluginPanasonicToughpad", "scanBarcode", [message]);
 };
 
+CordovaPluginPanasonicToughpad.prototype.initAPI = function(message, successCallback, errorCallback) {
+    console.log('Plugin called: initAPI(...)');
+    exec( successCallback, errorCallback, "CordovaPluginPanasonicToughpad", "initAPI", [message]);
+};
+
 module.exports = new CordovaPluginPanasonicToughpad();

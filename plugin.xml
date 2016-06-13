@@ -29,6 +29,7 @@
             </feature>
         </config-file>
         <config-file parent="/*" target="AndroidManifest.xml"></config-file>
+        <source-file src="src/android/libs/Toughpad.jar" target-dir="libs" framework="true" />
         <source-file src="src/android/CordovaPluginPanasonicToughpad.java" target-dir="src/com/volho/example/cordova/plugin" />
     </platform>
 </plugin>

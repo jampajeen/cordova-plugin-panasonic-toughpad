@@ -1,2 +1,2 @@
 #!/usr/bin/env node
-console.log('* CordovaPluginPanasonicToughpad plugin add hook script *');
+console.log('* CordovaPluginPanasonicToughpad plugin added *');

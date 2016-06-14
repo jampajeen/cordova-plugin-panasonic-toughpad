@@ -38,6 +38,8 @@ import com.panasonic.toughpad.android.api.barcode.BarcodeReader;
 import com.panasonic.toughpad.android.api.barcode.BarcodeReaderManager;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 /*
 * Main Cordova plugin class
@@ -68,26 +70,32 @@ public class CordovaPluginPanasonicToughpad extends CordovaPlugin {
         return true;
     }
 
-    public void initAPI(String message, final CallbackContext callbackContext) {
+    public void initAPI(String message, final CallbackContext callbackContext) throws JSONException {
         if (this.barcode == null) {
             this.barcode = new ToughpadBarcode(this.cordova.getActivity());
         }
+
         try {
+            this.barcode.setCallbackContext(callbackContext); // set CallbackContext 
             this.barcode.initApi();
-            Log.d("volho", "Toughpad API initialized - ToughpadBarcode object is created");
-            callbackContext.success("Toughpad API initialized - ToughpadBarcode object is created");
+            
         } catch (Exception e) {
             Log.d("volho", "Toughpad API initialize failed", e);
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("success", false);
+            jsonObject.put("message", "Toughpad API initialize failed");
+            String json  = jsonObject.toString();
             callbackContext.error("Toughpad API initialize failed ");
         }
     }
 
-    public void scanBarcode(String message, final CallbackContext callbackContext) {
+    public void scanBarcode(String message, final CallbackContext callbackContext) throws JSONException {
         try {
-            if (this.barcode.isSelectedReaderDeviceEnabled()) {
+            if (this.barcode.isSelectedReaderDeviceEnabled()) { // scan
+                this.barcode.setCallbackContext(callbackContext); // set CallbackContext before scan
                 this.barcode.toggleSoftwareTriggerReaderPress();
                 Log.d("volho", "Toggle reader device");
-            } else {
+            } else { // enable device
                 this.barcode.selectLaserDevice();
                 this.barcode.printSelectedReaderDeviceInfo();
                 this.barcode.enableSelectedReaderDevice(true); // need event handler
@@ -95,9 +103,12 @@ public class CordovaPluginPanasonicToughpad extends CordovaPlugin {
             }
         } catch (Exception e) {
             Log.e("volho", "Error barcode API function call", e);
-            callbackContext.error("Error barcode API function call");
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("success", false);
+            jsonObject.put("message", "Error barcode API function call");
+            String json  = jsonObject.toString();
+            callbackContext.error(json);
         }
-        callbackContext.success("scanBarcode function is called");
     }
 }
 
@@ -109,6 +120,7 @@ class ToughpadBarcode implements ToughpadApiListener, BarcodeListener {
     private List<BarcodeReader> readers;
     private BarcodeReader selectedReader;
     private Activity activity;
+    private CallbackContext callbackContext;
 
     public ToughpadBarcode(Context context) {
         this.activity = (Activity) context;
@@ -131,6 +143,17 @@ class ToughpadBarcode implements ToughpadApiListener, BarcodeListener {
     public void onApiConnected(int version) {
         Log.d("volho", "ToughpadBarcode.onApiConnected");
 
+        Log.d("volho", "Toughpad API initialized");
+        try {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("success", true);
+            jsonObject.put("message", "Toughpad API initialized");
+            String json  = jsonObject.toString();
+            this.callbackContext.success(json);
+        } catch(JSONException e) {
+            Log.e("volho", "JSON serialize failed, cannot send result", e);
+        }
+
         readers = BarcodeReaderManager.getBarcodeReaders();
 
         Log.d("volho", "Available devices : ");
@@ -148,6 +171,37 @@ class ToughpadBarcode implements ToughpadApiListener, BarcodeListener {
         Log.d("volho", "ToughpadBarcode.onRead => result device: " + bsObj.getDeviceName());
         Log.d("volho", "ToughpadBarcode.onRead => result symbology: " + result.getSymbology());
         Log.d("volho", "ToughpadBarcode.onRead => result data: " + result.getTextData());
+        
+        if(this.callbackContext != null) {
+            try {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("success", true);
+                jsonObject.put("device", bsObj.getDeviceName());
+                jsonObject.put("symbology", result.getSymbology());
+                jsonObject.put("data", URLEncoder.encode(result.getTextData(), "UTF-8"));
+                jsonObject.put("message", "success");
+                String json  = jsonObject.toString();
+                this.callbackContext.success(json);
+            } catch(JSONException e) {
+                Log.e("volho", "JSON serialize failed, cannot send result", e);
+            } catch(UnsupportedEncodingException e) {
+                Log.e("volho", "URL encode failed, cannot send result", e);
+            }
+        } else {
+            try {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("success", false);
+                jsonObject.put("message", "Not found CallbackContext or null");
+                String json  = jsonObject.toString();
+                this.callbackContext.error(json);
+            } catch(JSONException e) {
+                Log.e("volho", "JSON serialize failed, cannot send result", e);
+            }
+        }
+    }
+
+    public void setCallbackContext(CallbackContext callbackContext) {
+        this.callbackContext = callbackContext;
     }
 
     public void toggleSoftwareTriggerReaderPress() {

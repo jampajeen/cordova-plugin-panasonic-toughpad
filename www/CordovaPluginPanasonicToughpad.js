@@ -21,7 +21,6 @@ function CordovaPluginPanasonicToughpad() {
 
     var me = this;
     channel.onCordovaReady.subscribe(function() {
-
         me.available = true;
     });
 }

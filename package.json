@@ -1,6 +1,6 @@
 {
   "name": "CordovaPluginPanasonicToughpad",
-  "version": "1.0.0",
+  "version": "0.1",
   "description": "Cordova plugin for Panasonic Toughpad",
   "cordova": {
     "id": "cordova-plugin-panasonic-toughpad",
